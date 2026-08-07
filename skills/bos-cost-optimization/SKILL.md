@@ -20,8 +20,8 @@ The default gbrain install assumes enterprise scale (100K+ pages, 100K+ queries/
 | Component | Minimum-cost choice | Monthly cost at 1K queries/mo |
 |---|---|---|
 | Database | PGLite embedded | $0 |
-| Embeddings | ZeroEntropy free tier | $0 |
-| Reranker | ZeroEntropy free tier | $0 |
+| Embeddings | Google Gemini free tier (`gemini-embedding-001` at 768d) | $0 |
+| Reranker | (skipped — vector + BM25 + RRF only) | $0 |
 | Search mode | `conservative` | $0 (smaller chunks → fewer synthesis tokens) |
 | Synthesis model | Haiku 4.5 | $0.80–1.50 |
 | LLM expansion | OFF | $0 |
@@ -30,9 +30,15 @@ The default gbrain install assumes enterprise scale (100K+ pages, 100K+ queries/
 
 **Floor:** ~$1/mo with active use. **Ceiling:** ~$5/mo at moderate use. Anything above $10/mo means a knob has drifted.
 
+## Why no reranker
+
+The upstream gbrain default uses ZeroEntropy's bundled reranker. ZeroEntropy paused new signups as of August 2026, so this fork ships without one. The cost is small (~3-5% P@5 hit) and the floor is $0 lower.
+
+If ZeroEntropy reopens: re-enable by setting `search.reranker enabled=true` in config and exporting `ZEROENTROPY_API_KEY`. Compare quality before/after with `gbrain eval retrieval-quality` and decide whether the reranker quality lift is worth the API key.
+
 ## The 7 levers, ranked by $/quality impact
 
-1. **Default to ZeroEntropy free tier.** Free tier covers 10K embeddings/mo + 1K reranks/mo. That's a 500–1,000-page brain with normal use. Don't open an OpenAI key unless you've exhausted this.
+1. **Default to Google Gemini free tier.** `gemini-embedding-001` at 768d, free tier allows ~1,500 requests/day. That's a 500-page brain with normal use, and the daily limit means we won't hit it from a single import. Use your existing Google account — no new signup, no card, no email verification loop.
 
 2. **`gbrain search` mode = `conservative`.** 4K token budget. Cuts synthesis input by ~3x vs `balanced` with <5% quality loss for typical queries. Set via `gbrain config set search.mode conservative`.
 

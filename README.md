@@ -7,7 +7,7 @@ This is a fork of [garrytan/gbrain](https://github.com/garrytan/gbrain) (MIT, 27
 ## What's different from upstream
 
 - **Default cost posture: ~$1–5/mo** for active use. Upstream defaults assume enterprise scale.
-- **Conservative search mode + ZeroEntropy + Haiku synthesis** set as the install defaults. No surprise $200/mo bill.
+- **Conservative search mode + Google Gemini free tier + Haiku synthesis** set as the install defaults. Zero new-account cost (Gemini uses your existing Google login). Zero surprise bills.
 - **`skills/bos-cost-optimization/`** — operating manual for keeping spend at floor.
 - **Brain Cost Tracker schema** documented in this README so the spend is auditable, not implicit.
 
@@ -22,11 +22,11 @@ export PATH="$HOME/.bun/bin:$PATH"
 bun install -g github.com/cynthiajones34/GBrain
 
 # 2. Set the API keys BEFORE init so the picker auto-selects the cheapest recipe
-export ZEROENTROPY_API_KEY=<from https://dashboard.zeroentropy.dev>
+export GOOGLE_GENERATIVE_AI_API_KEY=<from https://aistudio.google.com/apikey>
 export ANTHROPIC_API_KEY=<from https://console.anthropic.com>
 
-# 3. Init with PGLite (zero infra cost) and the cheapest embedding model
-gbrain init --pglite --model zeroentropyai:zembed-1 --expansion-model zeroentropyai:zerank-1-small
+# 3. Init with PGLite (zero infra cost) and Gemini free-tier embeddings
+gbrain init --pglite --model google:gemini-embedding-001 --embedding-dimensions 768
 
 # 4. Force conservative search mode (smallest token budget)
 gbrain config set search.mode conservative
@@ -50,8 +50,8 @@ gbrain think "what did I work on with [client name]?"
 | Component | Choice | Monthly cost |
 |---|---|---|
 | Database | PGLite embedded | $0 |
-| Embeddings | ZeroEntropy free tier (10K/mo) | $0 |
-| Reranker | ZeroEntropy zerank-1-small | $0 |
+| Embeddings | Google Gemini `gemini-embedding-001` (768d, free tier: 1,500 req/day) | $0 |
+| Reranker | (none — hybrid retrieval uses vector + BM25 + RRF) | $0 |
 | Search mode | conservative (4K token budget) | $0 |
 | Synthesis | Haiku 4.5 | $0.80–2.50 |
 | LLM expansion | OFF | $0 |
